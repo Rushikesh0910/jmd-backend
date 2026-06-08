@@ -111,7 +111,7 @@ app.post("/api/career", upload.single("resume"), async (req, res) => {
       to: process.env.EMAIL_USER,
       reply_to: email,
       subject: `👔 NEW JOB APPLICANT: ${fullName} for ${position}`,
-      text: `You have a new job application!\n\nName: ${fullName}\nPhone: ${phone}\nEmail: ${email}\nPosition: ${position}\nExperience: ${experience} Years\n\n📄 View Resume: ${resumeUrl}`,
+      text: `You have a new job application!\n\nName: ${fullName}\nPhone: ${phone}\nEmail: ${email}\nPosition: ${position}\nExperience: ${experience}\n\n📄 View Resume: ${resumeUrl}`,
     });
     console.log("📧 Applicant email sent successfully via Resend!");
 
