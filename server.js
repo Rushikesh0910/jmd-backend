@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 // --- NEW FILE HANDLING IMPORTS ---
 const multer = require("multer");
@@ -42,16 +42,8 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage });
 
-// --- NODEMAILER SETUP ---
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // Forces Render to use the secure, unblocked port
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// --- EMAIL API SETUP (Bypasses Render Firewall) ---
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ==========================================
 //                 API ROUTES
@@ -70,16 +62,15 @@ app.post("/api/contact", async (req, res) => {
     await newInquiry.save();
     console.log("📬 Contact saved to database!");
 
-    const mailOptions = {
-      from: `"${name} (Website Lead)" <${process.env.EMAIL_USER}>`,
+    // Send Email Notification via Resend API
+    await resend.emails.send({
+      from: "onboarding@resend.dev", // Required for Resend free tier
       to: process.env.EMAIL_USER,
-      replyTo: email,
+      reply_to: email,
       subject: `🚨 NEW CLIENT LEAD: ${name} needs ${service}`,
       text: `You have a new lead from the website!\n\nName: ${name}\nPhone: ${phone}\nEmail: ${email}\nService Required: ${service}\nMessage:\n${message}`,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log("📧 Contact email sent successfully!");
+    });
+    console.log("📧 Contact email sent successfully via Resend!");
 
     res
       .status(201)
@@ -114,17 +105,15 @@ app.post("/api/career", upload.single("resume"), async (req, res) => {
     await newApplicant.save();
     console.log("📄 Job Applicant saved to database!");
 
-    // 2. Send Email Notification
-    const mailOptions = {
-      from: `"${fullName} (Website Lead)" <${process.env.EMAIL_USER}>`,
+    // 2. Send Email Notification via Resend API
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
       to: process.env.EMAIL_USER,
-      replyTo: email,
+      reply_to: email,
       subject: `👔 NEW JOB APPLICANT: ${fullName} for ${position}`,
       text: `You have a new job application!\n\nName: ${fullName}\nPhone: ${phone}\nEmail: ${email}\nPosition: ${position}\nExperience: ${experience} Years\n\n📄 View Resume: ${resumeUrl}`,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log("📧 Applicant email sent successfully!");
+    });
+    console.log("📧 Applicant email sent successfully via Resend!");
 
     res
       .status(201)
