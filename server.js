@@ -64,7 +64,7 @@ app.post("/api/contact", async (req, res) => {
 
     // Send Email Notification via Resend API
     await resend.emails.send({
-      from: "onboarding@resend.dev", // Required for Resend free tier
+      from: `"${name} (Website Lead)" <onboarding@resend.dev>`, // Required for Resend free tier
       to: process.env.EMAIL_USER,
       reply_to: email,
       subject: `🚨 NEW CLIENT LEAD: ${name} needs ${service}`,
@@ -107,7 +107,7 @@ app.post("/api/career", upload.single("resume"), async (req, res) => {
 
     // 2. Send Email Notification via Resend API
     await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: `"${fullName} (Job Applicant)" <onboarding@resend.dev>`, // Required for Resend free tier
       to: process.env.EMAIL_USER,
       reply_to: email,
       subject: `👔 NEW JOB APPLICANT: ${fullName} for ${position}`,
